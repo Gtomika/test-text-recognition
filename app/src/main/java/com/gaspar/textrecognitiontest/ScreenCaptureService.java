@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -99,12 +100,11 @@ public class ScreenCaptureService extends Service {
                 if (image != null) {
                     Image.Plane[] planes = image.getPlanes();
                     ByteBuffer buffer = planes[0].getBuffer();
-                    int pixelStride = planes[0].getPixelStride();
-                    int rowStride = planes[0].getRowStride();
-                    int rowPadding = rowStride - pixelStride * mWidth;
 
                     // create bitmap
-                    bitmap = Bitmap.createBitmap(mWidth + rowPadding / pixelStride, mHeight, Bitmap.Config.ARGB_8888);
+                    bitmap = Bitmap.createBitmap(mWidth,
+                            mHeight,
+                            Bitmap.Config.ARGB_8888);
                     bitmap.copyPixelsFromBuffer(buffer);
 
                     //give screenshot to text recognizer, if ready
@@ -270,9 +270,13 @@ public class ScreenCaptureService extends Service {
 
     @SuppressLint("WrongConstant")
     private void createVirtualDisplay() {
-        // get width and height
-        mWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
-        mHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+// get width and height
+        WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getRealSize(size);
+        mWidth = size.x;
+        mHeight = size.y;
 
         // start capture reader
         mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 2);
