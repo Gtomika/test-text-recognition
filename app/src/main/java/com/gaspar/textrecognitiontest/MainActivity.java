@@ -3,12 +3,14 @@ package com.gaspar.textrecognitiontest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -27,14 +29,14 @@ public class MainActivity extends AppCompatActivity {
 
     private List<View> highlighers;
 
-    //private ImageView testDisplay;
+    private ImageView testDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         root = findViewById(R.id.root_layout);
-        //testDisplay = findViewById(R.id.testDisplay);
+        testDisplay = findViewById(R.id.testDisplay);
         EventBus.getDefault().register(this);
         highlighers = new ArrayList<>();
     }
@@ -69,6 +71,11 @@ public class MainActivity extends AppCompatActivity {
             root.addView(highlighter, params);
             highlighers.add(highlighter); //save view to be able to remove later
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(Bitmap bitmap) {
+        testDisplay.setImageBitmap(bitmap);
     }
 
     @Override

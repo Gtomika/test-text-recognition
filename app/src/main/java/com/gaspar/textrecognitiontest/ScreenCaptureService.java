@@ -124,6 +124,7 @@ public class ScreenCaptureService extends Service {
     }
 
     private void processScreenshot(Bitmap bitmap) {
+        EventBus.getDefault().post(bitmap); //send bitmap for display
         final BoundingBoxes boundingBoxes = new BoundingBoxes(); //this object will be sent
         InputImage image = InputImage.fromBitmap(bitmap, 0);
         TextRecognizer recognizer = TextRecognition.getClient();
@@ -270,7 +271,7 @@ public class ScreenCaptureService extends Service {
 
     @SuppressLint("WrongConstant")
     private void createVirtualDisplay() {
-// get width and height
+	// get width and height
         WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         Point size = new Point();

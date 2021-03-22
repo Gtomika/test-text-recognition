@@ -67,7 +67,6 @@
 
     </LinearLayout>
 
-    <!--
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -76,6 +75,5 @@
         android:maxWidth="200dp"
         android:maxHeight="200dp"
         android:layout_marginStart="200dp"/>
-    -->
 
 </FrameLayout>
