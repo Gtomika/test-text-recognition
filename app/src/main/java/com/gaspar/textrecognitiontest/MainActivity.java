@@ -1,38 +1,102 @@
 package com.gaspar.textrecognitiontest;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
+import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.text.Text;
-import com.google.mlkit.vision.text.TextRecognition;
-import com.google.mlkit.vision.text.TextRecognizer;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CODE = 100;
+
     private FrameLayout root;
 
-    private ImageView testDisplay;
+    private List<View> highlighers;
+
+    //private ImageView testDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         root = findViewById(R.id.root_layout);
-        testDisplay = findViewById(R.id.testDisplay);
+        //testDisplay = findViewById(R.id.testDisplay);
+        EventBus.getDefault().register(this);
+        highlighers = new ArrayList<>();
     }
 
-    public void takeScreenshot(View view) {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    //this will get called when the service sends the bounding boxes
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(BoundingBoxes boxes) {
+        for(Rect box: boxes.boxes) {
+            int left = box.left;
+            int top = box.top;
+            int right = box.right;
+            int bottom = box.bottom;
+
+            int[] location = new int[2];
+            root.getLocationOnScreen(location);
+
+            final View highlighter = LayoutInflater.from(MainActivity.this)
+                    .inflate(R.layout.highligher, root, false);
+
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(right - left,
+                    bottom - top);
+            params.setMargins(left - location[0],
+                    top - location[1],
+                    right - location[0],
+                    bottom - location[1]);
+            root.addView(highlighter, params);
+            highlighers.add(highlighter); //save view to be able to remove later
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                startService(ScreenCaptureService.getStartIntent(this, resultCode, data));
+            }
+        }
+    }
+
+    public void startProjection(View view) {
+        MediaProjectionManager mProjectionManager =
+                (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
+    }
+
+    public void stopProjection(View view) {
+        startService(ScreenCaptureService.getStopIntent(this));
+        for(View v: highlighers) { //remove highlighters
+            root.removeView(v);
+        }
+    }
+
+
+    /* THIS WAS THE OLD WAY OF TAKING AND PROCESSING THE SCREENSHOT
+     public void takeScreenshot(View view) {
         testDisplay.setImageBitmap(null);
         //screenshot
         View decorView = getWindow().getDecorView();
@@ -82,4 +146,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+     */
 }
