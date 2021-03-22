@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TextRecognitionTest</string>
+
+    <string name="hello">Hello</string>
+    <string name="highlight_card">Highlight Card</string>
+    <string name="test_display">Test display</string>
+    <string name="button">Take screenshot</string>
+</resources>
