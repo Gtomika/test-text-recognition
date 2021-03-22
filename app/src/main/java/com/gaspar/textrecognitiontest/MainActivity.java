@@ -29,14 +29,14 @@ public class MainActivity extends AppCompatActivity {
 
     private List<View> highlighers;
 
-    private ImageView testDisplay;
+    //private ImageView testDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         root = findViewById(R.id.root_layout);
-        testDisplay = findViewById(R.id.testDisplay);
+        //testDisplay = findViewById(R.id.testDisplay);
         EventBus.getDefault().register(this);
         highlighers = new ArrayList<>();
     }
@@ -47,9 +47,19 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
     }
 
+    /*
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(Bitmap bitmap) {
+       testDisplay.setImageBitmap(bitmap);
+    }
+     */
+
     //this will get called when the service sends the bounding boxes
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(BoundingBoxes boxes) {
+        for(View v: highlighers) { //remove old highlighters
+            root.removeView(v);
+        }
         for(Rect box: boxes.boxes) {
             int left = box.left;
             int top = box.top;
@@ -71,11 +81,6 @@ public class MainActivity extends AppCompatActivity {
             root.addView(highlighter, params);
             highlighers.add(highlighter); //save view to be able to remove later
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onMessageEvent(Bitmap bitmap) {
-        testDisplay.setImageBitmap(bitmap);
     }
 
     @Override

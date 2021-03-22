@@ -51,7 +51,6 @@ public class ScreenCaptureService extends Service {
     private static int IMAGES_PRODUCED;
 
     private MediaProjection mMediaProjection;
-    private String mStoreDir;
     private ImageReader mImageReader;
     private Handler mHandler;
     private Display mDisplay;
@@ -100,11 +99,12 @@ public class ScreenCaptureService extends Service {
                 if (image != null) {
                     Image.Plane[] planes = image.getPlanes();
                     ByteBuffer buffer = planes[0].getBuffer();
+                    int pixelStride = planes[0].getPixelStride();
+                    int rowStride = planes[0].getRowStride();
+                    int rowPadding = rowStride - pixelStride * mWidth;
 
                     // create bitmap
-                    bitmap = Bitmap.createBitmap(mWidth,
-                            mHeight,
-                            Bitmap.Config.ARGB_8888);
+                    bitmap = Bitmap.createBitmap(mWidth + rowPadding / pixelStride, mHeight, Bitmap.Config.ARGB_8888);
                     bitmap.copyPixelsFromBuffer(buffer);
 
                     //give screenshot to text recognizer, if ready
