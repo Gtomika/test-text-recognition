@@ -3,7 +3,6 @@ package com.gaspar.textrecognitiontest;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,10 +35,11 @@ public class MainActivity extends AppCompatActivity {
     public void takeScreenshot(View view) {
         testDisplay.setImageBitmap(null);
         //screenshot
-        Bitmap bitmap = Bitmap.createBitmap(root.getWidth(),
-                root.getHeight(), Bitmap.Config.ARGB_8888);
+        View decorView = getWindow().getDecorView();
+        Bitmap bitmap = Bitmap.createBitmap(decorView.getWidth(),
+                decorView.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        root.draw(canvas);
+        decorView.draw(canvas);
 
         testDisplay.setImageBitmap(bitmap);
 
